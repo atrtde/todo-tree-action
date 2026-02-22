@@ -1,6 +1,6 @@
 name: "Todo Tree Action"
 description: "Scans PRs for TODO comments and posts them as a comment"
-author: "alexandretrotel"
+author: "atrtde"
 
 branding:
   icon: "check-square"
@@ -62,7 +62,7 @@ inputs:
   comment-header:
     description: "Custom header for the PR comment"
     required: false
-    default: "## TODO Summary"
+    default: "## Todo Tree Summary"
 
 outputs:
   total:
@@ -106,7 +106,6 @@ runs:
         script: |
           const fs = require('fs');
 
-          // Read the scan results
           let todos;
           try {
             todos = JSON.parse(fs.readFileSync('todos.json', 'utf8'));
@@ -119,10 +118,7 @@ runs:
           const changedOnly = '${{ inputs.changed-only }}' === 'true';
           const newOnly = '${{ inputs.new-only }}' === 'true';
 
-          // Format the comment
           let body = `${header}\n\n`;
-
-          // Add mode indicator
           if (newOnly) {
             body += '> Showing only **new** TODOs introduced in this PR\n\n';
           } else if (changedOnly) {
@@ -135,7 +131,6 @@ runs:
           if (files.length > 0 && total > 0) {
             body += `Found **${total}** TODO(s) in **${files.length}** file(s):\n\n`;
 
-            // Group by priority/tag for better visualization
             const byTag = {};
             for (const file of files) {
               for (const item of (file.items || [])) {
@@ -144,7 +139,6 @@ runs:
               }
             }
 
-            // Show summary by tag
             body += '<details>\n<summary>Summary by tag</summary>\n\n';
             body += '| Tag | Count |\n|-----|-------|\n';
             for (const [tag, items] of Object.entries(byTag)) {
@@ -152,15 +146,13 @@ runs:
             }
             body += '\n</details>\n\n';
 
-            // Show details by file
             body += '<details open>\n<summary>Details by file</summary>\n\n';
             for (const file of files) {
               if (file.items && file.items.length > 0) {
                 body += `#### \`${file.path}\`\n`;
                 for (const item of file.items) {
                   const priority = item.priority || 'Medium';
-                  const icon = priority === 'Critical' ? '🔴' : priority === 'High' ? '🔴' : priority === 'Medium' ? '🟡' : '🔵';
-                  body += `- ${icon} **${item.tag}** (L${item.line}): ${item.message}\n`;
+                  body += `- [${priority}] **${item.tag}** (L${item.line}): ${item.message}\n`;
                 }
                 body += '\n';
               }
@@ -170,10 +162,8 @@ runs:
             body += 'No TODOs found!\n';
           }
 
-          // Add footer with timestamp
           body += `\n---\n<sub>Last updated: ${new Date().toISOString()}</sub>`;
 
-          // Find existing comment to update
           const { data: comments } = await github.rest.issues.listComments({
             owner: context.repo.owner,
             repo: context.repo.repo,
