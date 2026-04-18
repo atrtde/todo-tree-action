@@ -59,7 +59,7 @@ install_todo_tree() {
     esac
 
     local download_url
-    download_url="https://github.com/alexandretrotel/todo-tree/releases/latest/download/${binary}"
+    download_url="https://github.com/atrtde/todo-tree/releases/latest/download/${binary}"
     local tmp_dir
     tmp_dir=$(mktemp -d)
 
