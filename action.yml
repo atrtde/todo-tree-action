@@ -1,6 +1,6 @@
 name: "Todo Tree Action"
 description: "Scans PRs for TODO comments and posts them as a comment"
-author: "atrtde"
+author: "alexandretrotel"
 
 branding:
   icon: "check-square"
